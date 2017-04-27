@@ -12,5 +12,33 @@
         android:layout_height="60dp"
         android:gravity="center"
         android:text="自定义View -- 1" />
+    <TextView
+        android:id="@+id/activity_eraser"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:layout_below="@+id/activity_easy"
+        android:text="自定义View -- 手势" />
+    <TextView
+        android:id="@+id/activity_alpha"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:layout_below="@+id/activity_eraser"
+        android:text="自定义View -- 图形边缘阴影" />
+    <TextView
+        android:id="@+id/activity_shader"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:layout_below="@+id/activity_alpha"
+        android:text="自定义View -- shader着色器" />
+    <TextView
+        android:id="@+id/activity_brick"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:layout_below="@+id/activity_shader"
+        android:text="自定义View -- brick" />
 
 </RelativeLayout>

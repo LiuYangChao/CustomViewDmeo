@@ -15,7 +15,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.ActivityEasy"></activity>
+        <activity android:name=".Activity.ActivityEasy" />
+        <activity android:name=".Activity.ActivityPath" />
+        <activity android:name=".Activity.ActivityAlpha" />
+        <activity android:name=".Activity.ActivityShader" />
+        <activity android:name=".Activity.ActivityBrick" />
+        <activity android:name=".Activity.ActivityMatrix"></activity>
     </application>
 
 </manifest>

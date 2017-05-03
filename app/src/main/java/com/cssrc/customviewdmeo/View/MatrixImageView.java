@@ -74,28 +74,64 @@ public class MatrixImageView extends ImageView {
                 if(preMove > 10F){
                     savedMatrix.set(currentMatrix);
                     calMidPoint(midP, event);
+                    currentMode = MODE_ZOOM;       //缩放或者旋转模式（因为用到了两个手指，这里只处理了两个）
                 }
-
+                preEventCoor = new float[4];
+                preEventCoor[0] = event.getX(0);
+                preEventCoor[1] = event.getX(1);
+                preEventCoor[2] = event.getY(0);
+                preEventCoor[3] = event.getY(1);
+                saveRotate = calRotation(event);
                 break;
             case MotionEvent.ACTION_UP:// 单点离开屏幕时
                 break;
             case MotionEvent.ACTION_POINTER_UP:// 第二个点离开屏幕时(有一个非主要的手指离开了)
+                currentMode = MODE_NONE;
+                preEventCoor = null;
                 break;
             case MotionEvent.ACTION_MOVE:// 触摸点移动时
+                if(currentMode == MODE_DRAG){           //单点触摸拖拽
+                    currentMatrix.set(savedMatrix);
+                    float dx = event.getX() - startP.x;
+                    float dy = event.getY() - startP.y;
+                    currentMatrix.postTranslate(dx, dy);        //平行变换移动
+                }else if(currentMode == MODE_ZOOM && event.getPointerCount() == 2){         //缩放或者旋转
+                    float currentMove = calSpacing(event);          //两个手指之间的直线距离
+                    currentMatrix.set(savedMatrix);
+                    if(currentMove > 10){
+                        float scale = currentMove / preMove;
+                        currentMatrix.postScale(scale, scale, midP.x, midP.y);              //放大或者缩小
+                    }
+                    if(preEventCoor != null){
+                        rotate = calRotation(event);
+                        float r = rotate - saveRotate;
+                        currentMatrix.postRotate(r, getMeasuredWidth()/2, getMeasuredHeight()/2);               //旋转
+                    }
+                }
                 break;
-
-
-
-
-
-
-
-
         }
+        setImageMatrix(currentMatrix);
+        return true;
+    }
 
+    /**
+     * 计算前后两个触摸点的角度
+     * @param event
+     * @return
+     */
+    private float calRotation(MotionEvent event){
+        double deltaX = event.getX(0) - event.getX(1);
+        double deltaY = event.getY(0) - event.getY(1);
+        double radius = Math.atan2(deltaX, deltaY);         //计算出弧度，弧度的范围是(-π, π]
+        return (float) Math.toDegrees(radius);                  //radius(弧度)*180/π  计算出角度
     }
 
 
+    /**
+     * 计算两个触摸点（手指）的中间点坐标，getX(0),getX(1),getX(2)就是指第1,2,3根手指触摸点
+     * @param pointF
+     * @param motionEvent
+     */
     private void calMidPoint(PointF pointF, MotionEvent motionEvent){
         float x = motionEvent.getX(0) + motionEvent.getX(1);
         float y = motionEvent.getY(0) + motionEvent.getY(1);

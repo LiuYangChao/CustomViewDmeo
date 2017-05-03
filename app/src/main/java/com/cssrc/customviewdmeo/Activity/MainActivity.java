@@ -25,6 +25,8 @@ public class MainActivity extends Activity {
     TextView activity_shader;
     @Bind(R.id.activity_brick)
     TextView activity_brick;
+    @Bind(R.id.activity_matrix)
+    TextView activity_matrix;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,12 @@ public class MainActivity extends Activity {
     @OnClick(R.id.activity_brick)
     void brickClick(){
         Intent intent = new Intent(this, ActivityBrick.class);
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.activity_matrix)
+    void matrixClick(){
+        Intent intent = new Intent(this, ActivityMatrix.class);
         startActivity(intent);
     }
 

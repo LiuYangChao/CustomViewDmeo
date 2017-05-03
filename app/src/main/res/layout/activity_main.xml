@@ -41,4 +41,12 @@
         android:layout_below="@+id/activity_shader"
         android:text="自定义View -- brick" />
 
+    <TextView
+        android:id="@+id/activity_matrix"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:layout_below="@+id/activity_brick"
+        android:text="自定义View -- matrix" />
+
 </RelativeLayout>

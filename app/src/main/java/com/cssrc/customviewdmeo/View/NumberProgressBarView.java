@@ -11,6 +11,7 @@ import android.view.View;
 
 import com.cssrc.customviewdmeo.R;
 import com.cssrc.customviewdmeo.Utils.DpUtils;
+import com.cssrc.customviewdmeo.Utils.MeasureUtil;
 
 /**
  * Author liuyangchao
@@ -119,6 +120,8 @@ public class NumberProgressBarView extends View {
      */
     private RectF mReachedRectF = new RectF(0, 0, 0, 0);
 
+    private OnProgressBarListener mListener;
+
 
     public enum ProgressTextVisibility{
         Visible, InVisible
@@ -204,6 +207,10 @@ public class NumberProgressBarView extends View {
         mTextPaint.setTextSize(mTextSize);
     }
 
+    /**
+     * 设置当前进度数值，刷新页面
+     * @param progress
+     */
     public void setProgress(int progress){
         if(progress <= getMax() && progress>=0){
             this.mCurrentProgress = progress;
@@ -274,6 +281,16 @@ public class NumberProgressBarView extends View {
         mUnreachedRectF.bottom = getHeight()/2.0f + mUnReachedBarHeight/2.0f;
     }
 
+    @Override
+    protected int getSuggestedMinimumHeight() {
+        return (int) mTextSize;
+    }
+
+    @Override
+    protected int getSuggestedMinimumWidth() {
+        return (int) Math.max(mTextSize, Math.max(mReachedBarHeight, mUnReachedBarHeight));
+    }
+
     /**
      * 测量View的宽度和高度
      * @param measureSpec       系统绘制必须的一个参数，32位Int型参数
@@ -288,15 +305,25 @@ public class NumberProgressBarView extends View {
         int padding = isWidth?getPaddingLeft() + getPaddingRight() : getPaddingTop() + getPaddingBottom();
         if(mode == MeasureSpec.EXACTLY){
             result = size;
+        }else{
+            result = isWidth?getSuggestedMinimumWidth():getSuggestedMinimumHeight();
+            result+=padding;
+            if(mode == MeasureSpec.AT_MOST){
+                if(isWidth){
+                    result = Math.max(result, size);            //宽度测量取最大值
+                }else{
+                    result = Math.min(result, size);            //高度测量取最小值
+                }
+            }
         }
-
+        return result;
     }
 
     //*************************measure-layout-draw*****************************
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(mes);
+        setMeasuredDimension(measure(widthMeasureSpec, true), measure(heightMeasureSpec, false));
     }
 
     @Override
@@ -365,4 +392,22 @@ public class NumberProgressBarView extends View {
     public String getmPrefix() {
         return mPrefix;
     }
+
+    /**
+     *
+     * @param by  每次递增的数值
+     */
+    public void incrementProgressBy(int by){
+        if(by > 0){
+            setProgress(getmCurrentProgress()+by);
+        }
+        if(mListener != null){
+            mListener.onProgressChange(getmCurrentProgress(), getMax());
+        }
+    }
+
+    public void setOnProgressBarListener(OnProgressBarListener listener){
+        mListener = listener;
+    }
+
 }

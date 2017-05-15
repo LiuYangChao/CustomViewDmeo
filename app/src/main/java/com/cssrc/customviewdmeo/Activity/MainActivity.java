@@ -27,6 +27,8 @@ public class MainActivity extends Activity {
     TextView activity_brick;
     @Bind(R.id.activity_matrix)
     TextView activity_matrix;
+    @Bind(R.id.activity_animator)
+    TextView activity_animator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,12 @@ public class MainActivity extends Activity {
     @OnClick(R.id.activity_matrix)
     void matrixClick(){
         Intent intent = new Intent(this, ActivityMatrix.class);
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.activity_animator)
+    void animatorClick(){
+        Intent intent = new Intent(this, ActivityAnimator.class);
         startActivity(intent);
     }
 

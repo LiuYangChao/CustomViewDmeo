@@ -1,6 +1,7 @@
 package com.cssrc.customviewdmeo.spinkit.sprite;
 
 import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -9,6 +10,10 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.util.FloatProperty;
+import android.util.IntProperty;
+import android.util.Property;
 
 import com.cssrc.customviewdmeo.spinkit.animation.AnimationUtils;
 
@@ -17,6 +22,7 @@ import com.cssrc.customviewdmeo.spinkit.animation.AnimationUtils;
  * Date on 2017/5/11.15:05
  */
 
+@TargetApi(Build.VERSION_CODES.N)
 public abstract class Sprite extends Drawable implements
         ValueAnimator.AnimatorUpdateListener,
         Animatable,
@@ -55,6 +61,17 @@ public abstract class Sprite extends Drawable implements
 
     public abstract void setColor(int color);
 
+    //修剪正方形
+    public Rect clipSquare(Rect rect){
+        int w = rect.width();
+        int h = rect.height();
+        int min = Math.min(w, h);
+        int cx = rect.centerX();
+        int cy = rect.centerY();
+        int r = min/2;
+        return new Rect(cx-r, cy-r, cx+r, cy+r);
+    }
+
     //--------------------------------end------------------------------
 
     //Drawable要实现的方法
@@ -73,6 +90,13 @@ public abstract class Sprite extends Drawable implements
     public void setAlpha(int alpha) {
         this.alpha = alpha;
     }
+
+    @Override
+    protected void onBoundsChange(Rect bounds) {
+        super.onBoundsChange(bounds);
+        setDrawBounds(bounds);
+    }
+
     //--------------------------------end------------------------------
 
     //Animatable要实现的方法,Animatable就是为了Drawable设计的
@@ -128,6 +152,36 @@ public abstract class Sprite extends Drawable implements
     }
     //--------------------------------end------------------------------
 
+    /**
+     * ValueAnimator.AnimatorUpdateListener  属性参数更新回调的时候调用
+     * 当一个drawable需要重新绘制的时候调用，这点上的View应该废止自己
+     * 或者至少一小部分
+     * @param who
+     */
+    @Override
+    public void invalidateDrawable(Drawable who) {
+        invalidateSelf();
+    }
+
+    //安排下一个动画
+    @Override
+    public void scheduleDrawable(Drawable who, Runnable what, long when) {
+
+    }
+    //取消下一个动画
+    @Override
+    public void unscheduleDrawable(Drawable who, Runnable what) {
+
+    }
+
+    @Override
+    public void onAnimationUpdate(ValueAnimator animation) {
+        Callback callback = getCallback();
+        if(callback != null){
+            callback.invalidateDrawable(this);      //不断回调不断刷新
+        }
+    }
+
     @Override
     public void draw(Canvas canvas) {
         int tx = getTranslateX();
@@ -135,8 +189,8 @@ public abstract class Sprite extends Drawable implements
         int ty = getTranslateY();
         ty = ty == 0? (int) (getBounds().height() * getTranslateYPercentage()) :ty;
         canvas.translate(tx, ty);
-        canvas.scale(getScaleX(), getScaleY(), getPivotX(), getPivotY());
-        canvas.rotate(getRotate(), getPivotX(), getPivotY());
+        canvas.scale(getScaleX(), getScaleY(), getPivotX(), getPivotY());                  //pivotX,pivotY是中心点，按照中心点缩放比例绘制
+        canvas.rotate(getRotate(), getPivotX(), getPivotY());                                   //旋转也是一样，按照中心点旋转
 
         if(getRotateX()!=0 || getRotateY() != 0){
             mCamera.save();
@@ -151,12 +205,66 @@ public abstract class Sprite extends Drawable implements
         drawSelf(canvas);
     }
 
+    public static final Property<Sprite, Float> SCALE = new FloatProperty<Sprite>("scale") {
+        @Override
+        public void setValue(Sprite object, float value) {
+            object.setScale(value);
+        }
+
+        @Override
+        public Float get(Sprite object) {
+            return object.getScale();
+        }
+    };
+
+    public static final Property<Sprite, Float> SCALE_X = new FloatProperty<Sprite>("scaleX") {
+        @Override
+        public void setValue(Sprite object, float value) {
+            object.setScaleX(value);
+        }
+
+        @Override
+        public Float get(Sprite object) {
+            return object.getScaleX();
+        }
+    };
+
+    public static final Property<Sprite, Float> SCALE_Y = new FloatProperty<Sprite>("scaleY") {
+        @Override
+        public void setValue(Sprite object, float value) {
+            object.setScaleY(value);
+        }
+
+        @Override
+        public Float get(Sprite object) {
+            return object.getScaleY();
+        }
+    };
+
+    public static final Property<Sprite, Integer> ALPHA = new IntProperty<Sprite>("alpha") {
+        @Override
+        public Integer get(Sprite object) {
+            return object.getAlpha();
+        }
+
+        @Override
+        public void setValue(Sprite object, int value) {
+            object.setAlpha(value);
+        }
+    };
+
+
+
+
+
     public float getScale() {
         return scale;
     }
 
     public void setScale(float scale) {
         this.scale = scale;
+        setScaleX(scale);
+        setScaleY(scale);
     }
 
     public float getScaleX() {
@@ -195,8 +303,9 @@ public abstract class Sprite extends Drawable implements
         return animationDelay;
     }
 
-    public void setAnimationDelay(int animationDelay) {
+    public Sprite setAnimationDelay(int animationDelay) {
         this.animationDelay = animationDelay;
+        return this;
     }
 
     public int getRotateX() {
@@ -277,7 +386,13 @@ public abstract class Sprite extends Drawable implements
     }
 
     public void setDrawBounds(Rect drawBounds) {
-        this.drawBounds = drawBounds;
+        setDrawBounds(drawBounds.left, drawBounds.top, drawBounds.right, drawBounds.bottom);
+    }
+
+    public void setDrawBounds(int left, int top, int right, int bottom) {
+        this.drawBounds = new Rect(left, top, right, bottom);
+        setPivotX(getDrawBounds().centerX());
+        setPivotY(getDrawBounds().centerY());
     }
 
     public Camera getmCamera() {
@@ -295,4 +410,7 @@ public abstract class Sprite extends Drawable implements
     public void setmMatrix(Matrix mMatrix) {
         this.mMatrix = mMatrix;
     }
+
+
+
 }

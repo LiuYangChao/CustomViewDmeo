@@ -48,5 +48,12 @@
         android:gravity="center"
         android:layout_below="@+id/activity_brick"
         android:text="自定义View -- matrix" />
+    <TextView
+        android:id="@+id/activity_animator"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:layout_below="@+id/activity_matrix"
+        android:text="属性动画---Animator" />
 
 </RelativeLayout>

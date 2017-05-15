@@ -20,7 +20,8 @@
         <activity android:name=".Activity.ActivityAlpha" />
         <activity android:name=".Activity.ActivityShader" />
         <activity android:name=".Activity.ActivityBrick" />
-        <activity android:name=".Activity.ActivityMatrix"></activity>
+        <activity android:name=".Activity.ActivityMatrix" />
+        <activity android:name=".Activity.ActivityAnimator"></activity>
     </application>
 
 </manifest>

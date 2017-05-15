@@ -7,9 +7,11 @@ import android.util.Property;
 import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 
+import com.cssrc.customviewdmeo.spinkit.animation.interpolator.KeyFrameInterpolator;
 import com.cssrc.customviewdmeo.spinkit.sprite.Sprite;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -25,6 +27,10 @@ public class SpriteAnimatorBuilder {
     private Interpolator interpolator;
     private int repeatCount = Animation.INFINITE;           //设置重复次数，INFINITE为无限
     private Map<String, FrameData> fds = new HashMap<>();
+
+    public SpriteAnimatorBuilder(Sprite sprite) {
+        this.sprite = sprite;
+    }
 
     class FrameData<T>{
         public FrameData(float[] fractions, Property property, T[] values){
@@ -48,6 +54,64 @@ public class SpriteAnimatorBuilder {
             super(fractions, property, values);
         }
     }
+
+    private void holder(float[] fractions, Property property, Float[] values){
+        ensurePair(fractions.length, values.length);
+        fds.put(property.getName(), new FloatFrameData(fractions, property, values));
+    }
+
+    private void holder(float[] fractions, Property property, Integer[] values){
+        ensurePair(fractions.length, values.length);
+        fds.put(property.getName(), new IntFrameData(fractions, property, values));
+    }
+
+    //确保时间序列和属性序列数量一致
+    private void ensurePair(int fractionsLength, int valuesLength){
+        if(fractionsLength != valuesLength){
+            throw new IllegalStateException(String.format(
+                    Locale.getDefault(),
+                    "The fractions.length must equal values.length, " +
+                            "fraction.length[%d], values.length[%d]",
+                    fractionsLength,
+                    valuesLength));
+        }
+    }
+
+    public SpriteAnimatorBuilder interpolator(Interpolator interpolator){
+        this.interpolator = interpolator;
+        return this;
+    }
+
+    public SpriteAnimatorBuilder easeInOut(float... fractions){
+        interpolator(KeyFrameInterpolator.easeInOut(fractions));
+        return this;
+    }
+
+    public SpriteAnimatorBuilder scale(float[] fractions, Float... scale){
+        holder(fractions, Sprite.SCALE, scale);
+        return this;
+    }
+
+    public SpriteAnimatorBuilder scaleX(float[] fractions, Float... scaleX){
+        holder(fractions, Sprite.SCALE_X, scaleX);
+        return this;
+    }
+
+    public SpriteAnimatorBuilder scaleY(float[] fractions, Float... scaleY){
+        holder(fractions, sprite.SCALE_Y, scaleY);
+        return this;
+    }
+
+    public SpriteAnimatorBuilder alpha(float[] fractions, Integer... alpha){
+        holder(fractions, Sprite.ALPHA, alpha);
+        return this;
+    }
+
+    public SpriteAnimatorBuilder duration(long duration){
+        this.duration = duration;
+        return this;
+    }
+
 
     public ObjectAnimator build(){
         PropertyValuesHolder[] holders = new PropertyValuesHolder[fds.size()];
@@ -93,17 +157,5 @@ public class SpriteAnimatorBuilder {
         animator.setInterpolator(interpolator);
         return animator;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
